@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fogos de Artifício para Milena e Daniel</title>
+    <style>
+        body {
+            background-color: black;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        button {
+            padding: 20px 40px;
+            font-size: 18px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        #fireworks {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <button id="fireworksButton">Milena e Daniel</button>
+    <canvas id="fireworks"></canvas>
+
+    <script>
+        var fireworksCanvas = document.getElementById('fireworks');
+        var ctx = fireworksCanvas.getContext('2d');
+        fireworksCanvas.width = window.innerWidth;
+        fireworksCanvas.height = window.innerHeight;
+
+        var fireworksButton = document.getElementById('fireworksButton');
+        fireworksButton.addEventListener('click', function() {
+            fireworksCanvas.style.display = 'block';
+            setTimeout(function() {
+                fireworksCanvas.style.display = 'none';
+            }, 3000); // Esconde os fogos após 3 segundos
+
+            // Função para criar fogos de artifício
+            function createFirework(x, y, color) {
+                var firework = {};
+                firework.x = x;
+                firework.y = y;
+                firework.color = color;
+                firework.trail = [];
+                firework.velocity = { x: Math.random() * 6 - 3, y: Math.random() * -15 - 10 };
+                firework.gravity = 0.2;
+                firework.opacity = 1;
+                firework.maxTrailLength = 50;
+                firework.sparkCount = Math.floor(Math.random() * 100) + 200;
+
+                // Cria as faíscas do foguete
+                for (var i = 0; i < firework.sparkCount; i++) {
+                    var spark = {};
+                    spark.x = firework.x;
+                    spark.y = firework.y;
+                    spark.velocity = { x: (Math.random() - 0.5) * 4, y: (Math.random() - 0.5) * 4 };
+                    spark.gravity = 0.1;
+                    spark.color = color;
+                    spark.opacity = 1;
+                    firework.trail.push(spark);
+                }
+
+                return firework;
+            }
+
+            // Atualiza e desenha os fogos de artifício
+            function updateFireworks() {
+                ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+                for (var i = 0; i < fireworks.length; i++) {
+                    var firework = fireworks[i];
+                    firework.velocity.y += firework.gravity;
+
+                    // Atualiza e desenha as faíscas
+                    for (var j = 0; j < firework.trail.length; j++) {
+                        var spark = firework.trail[j];
+                        spark.velocity.y += spark.gravity;
+                        spark.x += spark.velocity.x;
+                        spark.y += spark.velocity.y;
+                        spark.opacity -= 0.015;
+                        ctx.beginPath();
+                        ctx.arc(spark.x, spark.y, 3, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(' + spark.color + ',' + spark.opacity + ')';
+                        ctx.fill();
+                    }
+
+                    // Desenha o foguete
+                    firework.x += firework.velocity.x;
+                    firework.y += firework.velocity.y;
+                    firework.opacity -= 0.015;
+                    ctx.beginPath();
+                    ctx.arc(firework.x, firework.y, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(' + firework.color + ',' + firework.opacity + ')';
+                    ctx.fill();
+
+                    if (firework.opacity <= 0) {
+                        fireworks.splice(i, 1);
+                    }
+                }
+            }
+
+            // Array para armazenar os fogos de artifício
+            var fireworks = [];
+
+            // Cria fogos de artifício
+            setInterval(function() {
+                var x = Math.random() * fireworksCanvas.width;
+                var y = fireworksCanvas.height;
+                var color = Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256);
+                fireworks.push(createFirework(x, y, color));
+            }, 500);
+
+            // Atualiza os fogos de artifício a cada quadro
+            requestAnimationFrame(function loop() {
+                updateFireworks();
+                requestAnimationFrame(loop);
+            });
+        });
+    </script>
+</body>
+</html>
